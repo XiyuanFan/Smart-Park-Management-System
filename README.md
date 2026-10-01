@@ -5,7 +5,7 @@
 ## 技术栈
 
 - **前端**：React 18 + TypeScript + Ant Design 5 + Redux Toolkit + React Router 6 + axios + ECharts（Create React App 脚手架）
-- **后端**：Node.js 20 + Express 4 + TypeScript + Prisma 5 + MySQL 8 + JWT 鉴权
+- **后端**：Node.js 20 + **NestJS 12** + TypeScript 6 + Prisma 5 + MySQL 8 + JWT 鉴权 + Swagger 接口文档
 - **数据库**：MySQL 8.0，库名 `smart_park`，字符集 `utf8mb4`
 
 ## 快速启动
@@ -34,7 +34,10 @@ npm run db:seed             # 灌入种子数据
 npm run dev                 # 启动在 http://localhost:3001
 ```
 
-健康检查：<http://localhost:3001/health>
+启动后可访问：
+
+- 健康检查：<http://localhost:3001/health>
+- **Swagger 接口文档**：<http://localhost:3001/api-docs>（可直接在页面上调试所有接口）
 
 ### 第三步：启动前端
 
@@ -63,9 +66,10 @@ npm start                   # 启动在 http://localhost:3000
 │  ├─ utils/         动态路由生成、鉴权守卫、axios 封装
 │  ├─ store/         Redux Toolkit（登录态、菜单、业务缓存）
 │  └─ mock/          原 Mock.js 假数据层（已停用，保留备查）
-└─ server/           后端（Express + Prisma）
+└─ server/           后端（NestJS + Prisma）
    ├─ prisma/        数据模型与种子数据
-   └─ src/routes/    业务接口
+   └─ src/           按业务模块划分：auth / menu / tenant / equipment /
+                     estate / finance / energy / account / chat / health
 ```
 
 ## 动态路由是怎么工作的

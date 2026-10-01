@@ -6,7 +6,10 @@
  */
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import { prisma } from "../src/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+
+// 种子脚本是独立进程，不经过 NestJS 依赖注入，这里直接实例化客户端
+const prisma = new PrismaClient();
 
 /* ------------------------------------------------------------------ */
 /* 确定性随机工具                                                       */

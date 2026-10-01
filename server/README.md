@@ -1,53 +1,54 @@
 # 智慧园区管理系统 - 后端服务
 
-Express + TypeScript + Prisma + MySQL 实现的后端服务，用于替换前端原本的 Mock.js 假数据层。
+**NestJS 12** + TypeScript 6 + Prisma 5 + MySQL 8 实现的后端服务，用于替换前端原本的 Mock.js 假数据层。
 
 ## 技术栈
 
 | 项 | 选型 |
 |---|---|
-| 运行时 | Node.js 20 |
-| Web 框架 | Express 4 |
-| 语言 | TypeScript 5（`tsx` 直跑，无需先编译） |
+| 运行时 | Node.js 20（NestJS 12 要求 Node ≥ 20） |
+| Web 框架 | NestJS 12（底层为 Express 5） |
+| 语言 | TypeScript 6 |
 | ORM | Prisma 5 |
-| 数据库 | MySQL 8.0 |
-| 鉴权 | JWT（`jsonwebtoken`）+ bcrypt 密码哈希 |
+| 数据库 | MySQL 8.0（utf8mb4） |
+| 鉴权 | JWT（`@nestjs/jwt`）+ bcrypt 密码哈希 |
+| 文档 | Swagger（`@nestjs/swagger`） |
 
 ## 目录结构
 
 ```
 server/
 ├─ prisma/
-│  ├─ schema.prisma      数据模型定义
-│  └─ seed.ts            种子数据（把原 mock 数据落库）
+│  ├─ schema.prisma         数据模型定义（9 张表）
+│  └─ seed.ts               种子数据（把原 mock 数据落库）
 ├─ src/
-│  ├─ index.ts           服务入口、CORS、全局错误处理
-│  ├─ lib/
-│  │  ├─ prisma.ts       PrismaClient 单例
-│  │  ├─ jwt.ts          token 签发与校验
-│  │  ├─ menu.ts         菜单树组装、角色名映射
-│  │  ├─ response.ts     统一响应体
-│  │  └─ asyncHandler.ts 异步路由异常捕获
-│  ├─ middleware/
-│  │  └─ auth.ts         Bearer token 鉴权
-│  └─ routes/
-│     ├─ index.ts        路由汇总与鉴权挂载
-│     ├─ auth.ts         /login /menu
-│     ├─ tenant.ts       租户增删改查
-│     ├─ equipment.ts    设备台账
-│     ├─ estate.ts       房间
-│     ├─ finance.ts      合同、账单
-│     ├─ energy.ts       能耗曲线
-│     ├─ account.ts      账号与权限
-│     └─ chat.ts         私聊
-└─ .env                  数据库连接、JWT 密钥（不要提交）
+│  ├─ main.ts               入口：CORS、Swagger、启动日志
+│  ├─ app.module.ts         根模块，注册全局 Guard/Interceptor/Filter
+│  ├─ prisma/               PrismaService（PrismaClient 的可注入包装）
+│  ├─ common/
+│  │  ├─ decorators/        @Public / @ResponseMessage / @CurrentUser
+│  │  ├─ interceptors/      TransformInterceptor（统一成功响应）
+│  │  ├─ filters/           AllExceptionsFilter（统一失败响应）
+│  │  ├─ types/             ApiResponse
+│  │  └─ utils/             toStr / toNum
+│  ├─ auth/                 登录、菜单、AuthGuard、LoginDto
+│  ├─ menu/                 MenuService（按角色组装菜单树）
+│  ├─ health/               健康检查
+│  ├─ tenant/               租户（列表/删除/批量删除/新增编辑）
+│  ├─ equipment/            设备台账
+│  ├─ estate/               房间
+│  ├─ finance/              合同、账单
+│  ├─ energy/               能耗曲线
+│  ├─ account/              账号与菜单权限
+│  └─ chat/                 内部私聊
+└─ .env                     数据库连接、JWT 密钥（不要提交）
 ```
 
 ## 快速开始
 
 ### 1. 前置条件
 
-- Node.js ≥ 18（本项目用 20.20.2 验证）
+- Node.js ≥ 20（本项目用 20.20.2 验证）
 - MySQL 8.0 已启动
 
 > **本机注意**：这台机器上跑了两个 MySQL 实例。官方安装版（`C:\Program Files\MySQL\MySQL Server 8.0`）监听在 **3305**，
@@ -61,7 +62,7 @@ cd server
 cp .env.example .env   # Windows: copy .env.example .env
 ```
 
-然后按实际情况修改 `.env`：
+按实际情况修改 `.env`：
 
 ```ini
 DATABASE_URL="mysql://root:你的密码@127.0.0.1:3305/smart_park"
@@ -80,26 +81,22 @@ npm install
 ### 4. 初始化数据库
 
 ```bash
-# 建库（也可以用 MySQL 客户端手动执行）
 mysql -u root -p -h 127.0.0.1 -P 3305 -e "CREATE DATABASE IF NOT EXISTS smart_park DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# 按 schema 建表
-npx prisma db push
-
-# 生成客户端
-npx prisma generate
-
-# 灌入种子数据
-npm run db:seed
+npx prisma db push      # 按 schema 建表
+npx prisma generate     # 生成客户端
+npm run db:seed         # 灌入种子数据
 ```
 
 ### 5. 启动服务
 
 ```bash
-npm run dev
+npm run dev             # watch 模式，改代码自动重启
 ```
 
-启动后访问 <http://localhost:3001/health> 应返回 `{"code":200,...}`。
+| 地址 | 说明 |
+|---|---|
+| <http://localhost:3001/health> | 健康检查 |
+| <http://localhost:3001/api-docs> | **Swagger 交互式接口文档** |
 
 ## 可用账号
 
@@ -115,9 +112,6 @@ npm run dev
 角色不同 → `/menu` 返回的菜单树不同 → 前端动态生成的路由也不同。
 
 ## 接口清单
-
-所有接口统一返回 `{ code, message, data }`。**HTTP 状态码恒为 200**，业务状态放在 `code` 里
-（原因见 `src/lib/response.ts` 的注释：前端 `http.ts` 只在成功分支判断 `code`，没有错误拦截器）。
 
 | 方法 | 路径 | 说明 | 需鉴权 |
 |---|---|---|---|
@@ -137,45 +131,114 @@ npm run dev
 | GET | `/chat/v2/messages` | 与某人的聊天记录 | 是 |
 | POST | `/chat/v2/send` | 发送消息 | 是 |
 | POST | `/chat/v2/save` | 消息回写（幂等 upsert） | 是 |
+| GET | `/health` | 健康检查 | 否 |
 
-鉴权方式：请求头 `Authorization: Bearer <token>`，前端 axios 拦截器会自动携带。
+## 响应约定
 
-## 与原 Mock 的差异
+成功与失败使用同一套结构，区别在 HTTP 状态码：
 
-改造过程中发现并修正了原 mock 的几个问题，这些都属于"真后端才能暴露"的：
+```jsonc
+// 成功：HTTP 200
+{ "code": 200, "message": "请求成功", "data": { /* ... */ } }
 
-1. **`/equipmentList` 从未实现**。前端 `src/page/equipment/index.tsx` 一直在调用它，
-   但 `mock/index.ts` 里没有对应定义，所以设备管理页此前拿不到数据。现已补上。
-2. **列表筛选条件被忽略**。原 mock 收到 `companyName/contact/phone`、`contractNo/person/tel`
-   等查询参数后直接丢弃，只返回随机数据；现在全部落成真实 SQL `WHERE` 条件。
-3. **编辑接口是空操作**。原 mock 的 `/editUser` 只是 `console.log` 后返回成功。
-   根本原因是前端表单里没有 `id` 字段，编辑时无法定位记录 —— 已在
-   `src/page/users/userForm.tsx` 中补上从 Redux 取 `userData.id` 一并提交。
-4. **密码明文存储**。mock 里是明文比较，现改为 bcrypt 哈希后存库。
-5. **token 是假字符串**。原 mock 用 `mocktoken123456admin` 这种固定串，
-   现改为带过期时间的真实 JWT，并由服务端中间件校验。
+// 失败：HTTP 401 / 400 / 404 / 500 ...
+{ "code": 401, "message": "登录已失效，请重新登录", "data": null }
+```
+
+这一套由两个全局组件实现：
+
+- `TransformInterceptor` —— 把 controller 的返回值包装成成功响应
+- `AllExceptionsFilter` —— 把异常统一成失败响应，并映射为真实 HTTP 状态码
+
+> **重要**：这套约定要求前端在 axios 的**失败分支**里取 `error.response.data.message`。
+> 见 `src/utils/http/http.ts` 的响应拦截器。
+
+## 架构说明
+
+### 全局组件为什么用 `APP_*` 注册
+
+`app.module.ts` 里这样注册：
+
+```ts
+providers: [
+  { provide: APP_GUARD, useClass: AuthGuard },
+  { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+  { provide: APP_FILTER, useClass: AllExceptionsFilter },
+]
+```
+
+如果改用 `app.useGlobalGuards(new AuthGuard())` 这种手动实例化方式，
+`AuthGuard` 就拿不到 `Reflector` 和 `JwtService`，`@Public()` 装饰器也会失效。
+
+### 鉴权流程
+
+1. `AuthGuard` 是全局守卫，先查 `@Public()` 元数据，命中则放行（`/login`、`/health`）
+2. 否则读取 `Authorization: Bearer <token>`，用 `JwtService.verifyAsync` 校验
+3. 校验通过把载荷挂到 `request.user`，控制器里用 `@CurrentUser()` 取出
+4. 失败抛 `UnauthorizedException` → `AllExceptionsFilter` → HTTP 401
+
+### 为什么没有启用 ValidationPipe
+
+`class-validator` / `class-transformer` 作为 `@nestjs/common` 的 peerDependency 已安装，
+DTO 类主要给 Swagger 提供 schema。但**没有**注册全局 `ValidationPipe`，
+参数校验仍是 Service 里的显式判断（如 `if (!data.name) throw new BadRequestException(...)`）。
+
+想改成声明式校验，只需两步：
+
+```ts
+// main.ts
+app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+// dto 里加装饰器
+@IsNotEmpty({ message: '客户名称不能为空' })
+name: string;
+```
+
+## 从 Express 迁移过来的说明
+
+`server/` 目录在 2026-10 从 Express 4 原地重塑为 NestJS 12。旧版本完整保留在 git 里：
+
+```bash
+git checkout legacy/express-backend   # 分支
+git show v1.0-express                 # 标签
+```
+
+迁移过程中修正了原 mock 的 5 个问题：
+
+1. **`/equipmentList` 从未实现** —— 前端 `src/page/equipment/index.tsx` 一直在调用它，
+   但 `mock/index.ts` 里没有对应定义，设备管理页此前拿不到数据。现已补上。
+2. **列表筛选条件被忽略** —— 原 mock 收到查询参数后直接丢弃只返回随机数据；现已全部落成真实 SQL `WHERE`。
+3. **编辑接口是空操作** —— 根因是前端表单没有 `id` 字段，已在 `src/page/users/userForm.tsx` 补上。
+4. **密码明文存储** —— 改为 bcrypt 哈希。
+5. **token 是固定假字符串** —— 改为带过期时间的真实 JWT，由 AuthGuard 校验。
 
 ## 常用命令
 
 ```bash
-npm run dev          # 开发模式（热重载）
+npm run dev          # watch 模式启动
 npm run build        # 编译到 dist/
-npm start            # 运行编译产物
+npm run start:prod   # 运行编译产物（node dist/main.js）
+npm run typecheck    # 只做类型检查
 npm run db:push      # 同步 schema 到数据库
 npm run db:seed      # 重新灌入种子数据（会先清空）
-npm run db:studio    # 打开 Prisma Studio 可视化查看数据
-npm run db:reset     # 重置数据库并重新 seed
+npm run db:studio    # Prisma Studio 可视化查看数据
 ```
 
 ## 常见问题
 
 **连不上数据库**
-先确认端口：`netstat -ano | findstr 3305`。如果你本机数据库在 3306，改 `.env` 里的端口即可。
+先确认端口：`netstat -ano | findstr 3305`。如果本机数据库在 3306，改 `.env` 里的端口即可。
+
+**`nest start` 报 TS5011 / TS5101 之类的错误**
+本项目用的是 TypeScript 6。TS 6 起要求显式设置 `rootDir`，并且弃用了 `baseUrl`，
+这些都已在 `tsconfig.build.json` / `tsconfig.json` 里处理。升级 TS 主版本时请留意 `https://aka.ms/ts6`。
+
+**npm install 报 EBADENGINE 警告**
+`@nestjs/cli` 的传递依赖 `commander@15` 声明要求 Node ≥ 22，
+但在 Node 20.20.2 上实测 CLI 功能正常（`npx nest --version` 可用）。属于警告，可忽略。
 
 **中文乱码**
 建库时必须指定 `utf8mb4`。用命令行客户端查询时带上 `--default-character-set=utf8mb4`。
 注意：用 PowerShell 的 `Invoke-RestMethod` 发中文请求体时，若不显式指定 charset，
-PowerShell 会按 ASCII 编码导致中文变成 `?`，这是客户端行为，浏览器里 axios 不受影响。
-
-**`/login` 返回 400「请求体格式有误」**
-说明请求体不是合法 JSON，检查发送端是否正确设置了 `Content-Type: application/json`。
+PowerShell 会按 ASCII 编码导致中文变成 `?`。**这是客户端行为**，浏览器里 axios 不受影响。
+测试时可用：`-Body ([System.Text.Encoding]::UTF8.GetBytes($json))`。
