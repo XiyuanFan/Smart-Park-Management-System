@@ -1,0 +1,174 @@
+// 智慧园区管理系统 - 数据模型
+// 所有表名统一使用前缀：sys_ 系统域，biz_ 业务域
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// 系统账号（对应前端 mock 里的 mockAccounts）
+model Account {
+  id          Int      @id @default(autoincrement())
+  accountName String   @unique @map("account_name") @db.VarChar(50)
+  /// bcrypt 加密后的密码，不再明文存储
+  password    String   @db.VarChar(255)
+  /// 角色：admin / manager / user / customize，决定返回哪棵菜单树
+  role        String   @db.VarChar(20)
+  person      String   @db.VarChar(50)
+  tel         String   @db.VarChar(20)
+  department  String   @db.VarChar(50)
+  /// 按钮级权限，如 ["add","edit","delete"]
+  btnAuth     Json?    @map("btn_auth")
+  online      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("sys_account")
+}
+
+/// 菜单（按角色分别存储一棵树，通过 parentId 自关联）
+/// 说明：这里刻意没有拆成 menu + role_menu 多对多，因为本项目每个角色的
+/// 菜单顺序并不完全一致（内部私聊菜单的插入位置不同），按角色存树更直观。
+model Menu {
+  id       Int    @id @default(autoincrement())
+  role     String @db.VarChar(20)
+  menuKey  String @map("menu_key") @db.VarChar(100)
+  label    String @db.VarChar(50)
+  icon     String @db.VarChar(50)
+  parentId Int?   @map("parent_id")
+  sort     Int    @default(0)
+
+  parent   Menu?  @relation("MenuTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Menu[] @relation("MenuTree")
+
+  @@unique([role, menuKey])
+  @@index([role, parentId, sort])
+  @@map("sys_menu")
+}
+
+/// 租户（企业）信息
+model Tenant {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(100)
+  /// 1 营业中 / 2 暂停营业 / 3 已关闭
+  status           String   @db.VarChar(2)
+  tel              String   @db.VarChar(20)
+  business         String   @db.VarChar(50)
+  email            String   @db.VarChar(100)
+  creditCode       String   @map("credit_code") @db.VarChar(30)
+  industryNum      String   @map("industry_num") @db.VarChar(30)
+  organizationCode String   @map("organization_code") @db.VarChar(30)
+  legalPerson      String   @map("legal_person") @db.VarChar(50)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([name])
+  @@map("biz_tenant")
+}
+
+/// 房间信息，building 对应前端的 a1/a2/b1... 楼栋标识
+model Room {
+  id             Int    @id @default(autoincrement())
+  building       String @db.VarChar(20)
+  roomNumber     Int    @map("room_number")
+  decorationType String @map("decoration_type") @db.VarChar(10)
+  area           Int
+  unitPrice      Int    @map("unit_price")
+  src            String @db.VarChar(500)
+
+  @@index([building])
+  @@map("biz_room")
+}
+
+/// 合同
+model Contract {
+  id         Int    @id @default(autoincrement())
+  contractNo String @map("contract_no") @db.VarChar(30)
+  type       String @db.VarChar(30)
+  name       String @db.VarChar(100)
+  startDate  String @map("start_date") @db.VarChar(20)
+  endDate    String @map("end_date") @db.VarChar(20)
+  /// 甲方
+  jia        String @db.VarChar(100)
+  /// 乙方
+  yi         String @db.VarChar(100)
+  /// 1 待审核 / 2 已生效 / 3 已失效
+  status     String @db.VarChar(2)
+  /// 联系人（对应前端查询条件 person，原 mock 未实现该筛选）
+  person     String @db.VarChar(50)
+  /// 联系电话（对应前端查询条件 tel，原 mock 未实现该筛选）
+  tel        String @db.VarChar(20)
+
+  @@index([contractNo])
+  @@map("biz_contract")
+}
+
+/// 账单
+model Bill {
+  id           Int    @id @default(autoincrement())
+  accountNo    String @map("account_no") @db.VarChar(30)
+  /// 1 未结清 / 2 已结清
+  status       String @db.VarChar(2)
+  roomNo       String @map("room_no") @db.VarChar(50)
+  carNo        String @map("car_no") @db.VarChar(20)
+  tel          String @db.VarChar(20)
+  costName1    Float  @map("cost_name1")
+  costName2    String @map("cost_name2") @db.VarChar(50)
+  costName3    String @map("cost_name3") @db.VarChar(50)
+  startDate    String @map("start_date") @db.VarChar(20)
+  endDate      String @map("end_date") @db.VarChar(20)
+  preferential Float  @default(0)
+  money        Float
+  pay          String @db.VarChar(20)
+
+  @@index([accountNo])
+  @@map("biz_bill")
+}
+
+/// 能源消耗：series 存 7 天的数值数组
+model EnergyRecord {
+  id     Int    @id @default(autoincrement())
+  name   String @db.VarChar(20)
+  sort   Int    @default(0)
+  series Json
+
+  @@map("biz_energy")
+}
+
+/// 设备台账
+model Equipment {
+  id     Int    @id @default(autoincrement())
+  no     String @db.VarChar(30)
+  name   String @db.VarChar(50)
+  person String @db.VarChar(50)
+  tel    String @db.VarChar(20)
+  /// 理论寿命
+  time   String @db.VarChar(20)
+  /// 剩余寿命
+  rest   String @db.VarChar(20)
+  /// 1 使用中 / 2 维护中 / 3 已损坏
+  status String @db.VarChar(2)
+  /// 最近保养日期
+  last   String @db.VarChar(20)
+  type   String @db.VarChar(50)
+  from   String @db.VarChar(50)
+
+  @@index([name])
+  @@map("biz_equipment")
+}
+
+/// 私聊消息：fromUser / toUser 存的是 accountName
+model ChatMessage {
+  id        String   @id @db.VarChar(64)
+  fromUser  String   @map("from_user") @db.VarChar(50)
+  toUser    String   @map("to_user") @db.VarChar(50)
+  content   String   @db.Text
+  time      String   @db.VarChar(10)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([fromUser, toUser])
+  @@map("biz_chat_message")
+}

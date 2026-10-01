@@ -1,0 +1,106 @@
+.chat-page {
+    height: calc(90vh - 70px);
+
+    .chat-card {
+        height: 100%;
+    }
+
+    .chat-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 16px;
+        height: 100%;
+        min-height: 560px;
+    }
+
+    .friend-panel,
+    .message-panel {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .friend-list {
+        height: calc(100% - 52px);
+        overflow-y: auto;
+    }
+
+    .friend-item {
+        cursor: pointer;
+        padding: 12px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .friend-item:hover,
+    .friend-item.active {
+        background: #eef5ff;
+    }
+
+    .message-panel {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+    }
+
+    .message-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid #f0f0f0;
+        background: #fafafa;
+    }
+
+    .message-list {
+        flex: 1;
+        padding: 18px;
+        overflow-y: auto;
+        background: linear-gradient(180deg, #fbfdff 0%, #f6f8fb 100%);
+    }
+
+    .message-row {
+        display: flex;
+        margin-bottom: 14px;
+    }
+
+    .message-row.mine {
+        justify-content: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 62%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(15, 35, 65, 0.08);
+    }
+
+    .message-row.mine .message-bubble {
+        color: #ffffff;
+        background: #1677ff;
+    }
+
+    .message-meta {
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: #8c8c8c;
+    }
+
+    .message-row.mine .message-meta {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .message-input {
+        padding: 14px;
+        border-top: 1px solid #f0f0f0;
+        background: #ffffff;
+    }
+}
+
+@media (max-width: 900px) {
+    .chat-page {
+        height: auto;
+
+        .chat-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+}
