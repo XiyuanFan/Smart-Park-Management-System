@@ -39,7 +39,7 @@ function Login() {
             <div className="part">
                 <div className="title">
                     <div className="logo">
-                        <img src={logo} width={100} />
+                        <img src={logo} width={100} alt="朋远智慧园区管理平台" />
                     </div>
                     <h1>朋远智慧园区管理平台</h1>
                 </div>

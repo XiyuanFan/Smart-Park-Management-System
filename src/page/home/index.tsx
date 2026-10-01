@@ -1,5 +1,5 @@
 
-import { Breadcrumb, Layout, theme } from 'antd'; //引入 Ant Design 布局和主题能力
+import { Layout, theme } from 'antd'; //引入 Ant Design 布局和主题能力
 import { useState } from 'react';
 import NavLeft from '../../components/navLeft';
 import MyBreadCrumb from '../../components/breadCrumb';
@@ -9,7 +9,7 @@ const { Header, Content, Footer, Sider } = Layout; // Layout 是一个组件对�
 function Home() {
     const [collapsed, setCollapsed] = useState<boolean>(false); //控制左侧栏是否折叠的状态
     const {
-        token: { colorBgContainer, borderRadiusLG },
+        token: { colorBgContainer },
     } = theme.useToken();  //读取 Ant Design 5 的主题设计 token
     return <div className='home'>
         <Layout style={{ minHeight: '100vh' }}>  {/**页面最小高度撑满整个浏览器窗口 */}

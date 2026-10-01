@@ -1,5 +1,4 @@
 import React from "react";
-import { createBrowserRouter } from "react-router-dom";
 import RequireAuth from "../utils/RequireAuth";
 import { RouteObject } from "react-router-dom";
 const Home = React.lazy(() => import("../page/home"));

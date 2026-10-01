@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一分支的重复推送只保留最新一次，避免排队
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    name: 后端 (NestJS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    env:
+      # prisma generate 会校验 schema 中的 datasource，
+      # 这里给一个占位值即可 —— 本 job 不需要真正连库
+      DATABASE_URL: mysql://ci:ci@127.0.0.1:3306/smart_park
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 生成 Prisma Client
+        run: npx prisma generate
+
+      - name: 类型检查
+        run: npm run typecheck
+
+      - name: 构建
+        run: npm run build
+
+  web:
+    name: 前端 (React)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查
+        run: npx tsc --noEmit
+
+      - name: 构建
+        # 注意：CI=true 时 CRA 会把 ESLint 警告当作错误，构建会失败。
+        # 这正是我们想要的效果 —— 保证代码零警告。
+        run: npm run build
+        env:
+          CI: 'true'
+          # 仓库中不含 .env.development 之外的密钥，这里显式给一个占位后端地址
+          REACT_APP_API_URL: http://localhost:3001

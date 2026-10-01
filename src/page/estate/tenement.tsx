@@ -37,9 +37,10 @@ const columns:TableProps<DataType>['columns']=[
         dataIndex:"status",
         key:"status",
         render:(value)=>{
-            if(value==1){
+            // 接口返回的 status 是字符串，需显式转数字后再比较
+            if(Number(value)===1){
                 return <Tag color="#f50">建设中</Tag>
-            }else if(value==2){
+            }else if(Number(value)===2){
                 return <Tag color="#2db7f5">已竣工</Tag>
             }else{
                 return <Tag color="#87d068">使用中</Tag>

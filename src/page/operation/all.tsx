@@ -1,4 +1,4 @@
-import { Row, Col, Card, Badge, Statistic } from "antd"
+import { Row, Col, Card, Badge, Statistic, Button } from "antd"
 function All() {
     return <div>
         <Row gutter={16}>
@@ -22,7 +22,7 @@ function All() {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Card className="mt">
-                            <Card title="待办事项" extra={<a href="#">更多&gt;</a>} >
+                            <Card title="待办事项" extra={<Button type="link" size="small">更多&gt;</Button>} >
                                 <div style={{ display: "flex", justifyContent: "space-between", lineHeight: "30px" }}>
                                     <Badge color="blue" text="合同签订待处理" />
                                     <span style={{ color: "#666" }}>2024-01-02</span>
@@ -53,7 +53,7 @@ function All() {
                     <Col span={12}>
                         <Card className="mt">
                             <Card title="最新动态"
-                                extra={<a href="#">更多&gt;</a>}>
+                                extra={<Button type="link" size="small">更多&gt;</Button>}>
                                 <div style={{ display: "flex", justifyContent: "space-between", lineHeight: "30px" }}>
                                     <Badge color="red" text="同心共建经济圈，更上层峰开新..." />
                                     <span style={{ color: "#666" }}>2024-01-02</span>

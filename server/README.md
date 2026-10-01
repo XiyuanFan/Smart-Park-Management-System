@@ -13,6 +13,7 @@
 | 数据库 | MySQL 8.0（utf8mb4） |
 | 鉴权 | JWT（`@nestjs/jwt`）+ bcrypt 密码哈希 |
 | 文档 | Swagger（`@nestjs/swagger`） |
+| 缓存 | `@nestjs/cache-manager` + `cache-manager` v7（进程内内存 store） |
 
 ## 目录结构
 
@@ -192,6 +193,46 @@ app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 // dto 里加装饰器
 @IsNotEmpty({ message: '客户名称不能为空' })
 name: string;
+```
+
+## 缓存策略
+
+使用 `@nestjs/cache-manager` + `cache-manager` v7 的**进程内内存缓存**，在 `app.module.ts` 中全局注册：
+
+```ts
+CacheModule.register({ isGlobal: true, ttl: 5 * 60 * 1000 })
+```
+
+> 注意两个 v7 的坑：不传 `stores` 时会使用 Keyv 的默认内存 store；
+> 并且 **v7 已移除旧版的 `max` 选项**（不要照抄 v5 的文档）。
+
+目前只缓存了两个「读极多、写极少」的接口：
+
+| 接口 | 缓存 key | TTL |
+|---|---|---|
+| `GET /menu` | `menu:role:<角色>` | 5 分钟 |
+| `GET /energyData` | `energy:series` | 10 分钟 |
+
+**为什么 `/menu` 不用 `CacheInterceptor`？**
+
+`CacheInterceptor` 是按 **URL** 缓存的，而 `/menu` 对所有角色是同一个 URL、响应内容却不同。
+按 URL 缓存会把 A 角色的菜单返回给 B 角色 —— 这是权限泄漏。
+所以 `MenuService` 里手动以 `role` 拼 key。
+
+**为什么不缓存列表接口**：`/userList`、`/contractList` 等带分页与筛选条件，
+每次请求的 key 都不同，命中率极低，缓存只会白占内存。
+
+**失效入口**：`MenuService.invalidate(role?)` 与 `EnergyService.invalidate()`。
+当前项目还没有「修改菜单 / 角色权限」的写接口，这两个方法是给将来预留的 ——
+换句话说，**缓存一致性这个真正的难点在这个项目里还体现不出来**，面试时不必硬吹。
+
+命中情况可在启动日志中观察（`main.ts` 已打开 `debug` 级别）：
+
+```
+[MenuService]  菜单缓存写入: menu:role:admin (12 个顶级菜单)
+[MenuService]  菜单缓存命中: menu:role:admin
+[EnergyService] 能耗缓存写入: energy:series (5 条曲线)
+[EnergyService] 能耗缓存命中: energy:series
 ```
 
 ## 从 Express 迁移过来的说明

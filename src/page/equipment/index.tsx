@@ -60,9 +60,10 @@ const columns: TableProps<DataType>["columns"] = [
         dataIndex: 'status',
         key: 'status',
         render: (text) => {
-            if (text == 1) {
+            // 接口返回的 status 是字符串（"1"/"2"/"3"），需显式转数字后再比较
+            if (Number(text) === 1) {
                 return <Tag color="green">使用中</Tag>
-            } else if (text == 2) {
+            } else if (Number(text) === 2) {
                 return <Tag color="yellow">维护中</Tag>
             } else {
                 return <Tag color="red">已损坏</Tag>

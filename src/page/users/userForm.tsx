@@ -36,7 +36,10 @@ function UserForm(props: FormProps) {
     //这就是典型的新增 / 编辑复用表单思路。
     //弹窗打开时，根据当前场景初始化表单内容，清空还是显示当前编辑项的用户数据(把当前选中的用户数据回填到表单里，方便用户修改)
     useEffect(()=>{
-        title=="新增企业"? form.resetFields():form.setFieldsValue(userData)
+        title==="新增企业"? form.resetFields():form.setFieldsValue(userData)
+        // 只在弹窗打开时重置/回填表单，因此只依赖 visible。
+        // 若加入 form / title / userData，用户在表单里每输入一个字符都会触发回填，覆盖正在输入的内容。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[visible])  
 
     return <>

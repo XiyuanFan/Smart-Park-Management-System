@@ -1,5 +1,4 @@
 import { Card, Row, Col, Table, Input, Button, Pagination, Popconfirm, Tree } from "antd"
-import type { TableProps } from 'antd';
 import { getAccountList } from "../../api/users";
 import useDataList from "../../hooks/useDataList";
 import type { TreeDataNode, TreeProps } from 'antd';
@@ -218,6 +217,9 @@ function Settings() {
     //左侧树及勾选项一开始显示的是“当前登录用户的权限”。
     useEffect(() => {
         setCheckedKeys(extractTreeKeys(menuList))
+        // 左侧权限树只在页面挂载时用「当前登录用户的菜单」初始化一次，
+        // extractTreeKeys 未做 memo，加入依赖会造成重复执行。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     //提交修改权限请求checkedKeys和accountName

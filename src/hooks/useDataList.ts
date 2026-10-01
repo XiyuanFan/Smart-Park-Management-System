@@ -24,7 +24,10 @@ function useDataList<T extends MyFormData, U>(initialFormData: T, fetchData: Dat
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const { data: { list, total } } = await fetchData({ page, pageSize, ...formData });
+            // 这里刻意用 searchData 而不是 formData：
+            // searchData 只在点击「查询」时更新，formData 会随每次输入变化。
+            // 用 formData 会让依赖数组与读取的变量不一致（旧代码的隐患）。
+            const { data: { list, total } } = await fetchData({ page, pageSize, ...searchData });
             setDataList(list);
             setTotal(total)
         } catch (error) {

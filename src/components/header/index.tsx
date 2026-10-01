@@ -11,20 +11,12 @@ import { setMenu } from '../../store/login/authSlice';
 const items: MenuProps['items'] = [
   {
     key: '1',
-    label: (
-      <a target="_blank" >
-        个人中心
-      </a>
-    ),
+    label: <span>个人中心</span>,
     icon: <UserOutlined />,
   },
   {
     key: '2',
-    label: (
-      <a target="_blank" >
-        退出登录
-      </a>
-    ),
+    label: <span>退出登录</span>,
     icon: <PoweroffOutlined />,
   },
 
@@ -33,7 +25,7 @@ function MyHeader() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const onClick: MenuProps['onClick'] = ({ key }) => {
-    if (key == "1") {
+    if (key === "1") {
       //跳转到个人中心
       navigate("/personal")
     } else {
@@ -47,12 +39,12 @@ function MyHeader() {
     {/** Dropdown表示顶部是一个下拉菜单  
        * 菜单项内容由 items 决定； 点击行为由 onClick 决定*/}
     <Dropdown menu={{ items, onClick }}>
-      <a onClick={(e) => e.preventDefault()}> {/**阻止默认行为，只保留下拉菜单的交互效果。 */}
+      <span style={{ cursor: "pointer" }}> {/**下拉菜单的触发区域 */}
         <Space>
           欢迎您,{sessionStorage.getItem("username")}
           <DownOutlined />
         </Space>
-      </a>
+      </span>
     </Dropdown>
   </div>
 }

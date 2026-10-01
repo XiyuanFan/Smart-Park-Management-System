@@ -40,6 +40,9 @@ function Users() {
 
     useEffect(() => {
         loadData()
+        // loadData 未做 memo，加入依赖会导致无限请求；
+        // 这里刻意只在分页变化时重新拉取（查询由「查询」按钮单独触发）。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize]) //首次进入时加载数据；当页码变化时重新拉数据；当每页条数变化时重新拉数据
 
     //加载用户数据dataList
@@ -143,11 +146,12 @@ function Users() {
             key: "status",
             dataIndex: "status",
             render(value) {
-                if (value == 1) {
+                // 接口返回的 status 是字符串，需显式转数字后再比较
+                if (Number(value) === 1) {
                     return <Tag color="green">营业中</Tag>
-                } else if (value == 2) {
+                } else if (Number(value) === 2) {
                     return <Tag color="#f50">暂停营业</Tag>
-                } else if (value == 3) {
+                } else if (Number(value) === 3) {
                     return <Tag color="red">已关闭</Tag>
                 }
             } //状态码映射渲染

@@ -19,7 +19,7 @@ function RequireAuth({allowed,redirectTo,children}:Iprops){
         if(allowed!==isLogin){
             navigate(redirectTo)  
         } //如果鉴权不成功进行跳转其他页面，不能进入该路由
-    },[allowed,isLogin,redirectTo]) 
+    },[allowed,isLogin,redirectTo,navigate]) 
 
     return allowed===isLogin?<>{children}</>:<></>  //鉴权成功进入鉴权的子页面，即实际想要进入的页面
 }

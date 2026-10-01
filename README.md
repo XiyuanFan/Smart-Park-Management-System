@@ -1,5 +1,7 @@
 # 朋远智慧园区管理平台（全栈版）
 
+[![CI](https://github.com/XiyuanFan/Smart-Park-Management-System/actions/workflows/ci.yml/badge.svg)](https://github.com/XiyuanFan/Smart-Park-Management-System/actions/workflows/ci.yml)
+
 一个前后端分离的智慧园区中后台系统。
 
 ## 技术栈

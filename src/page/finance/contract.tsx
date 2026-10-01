@@ -104,6 +104,9 @@ function Dashboard(){
             setPage(current)
             setPageSize(size)
         }
+        // 这是「从详情页返回时恢复 Redux 缓存状态」的初始化逻辑，刻意只在挂载时执行一次；
+        // 若加入 loadData / formList / current / size 等依赖，会破坏这个恢复语义。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
     const columns:TableProps<DataType>["columns"]=[
@@ -154,9 +157,10 @@ function Dashboard(){
             dataIndex:"status",
             key:"status",
             render(value){
-                if(value==1){
+                // 接口返回的 status 是字符串，需显式转数字后再比较
+                if(Number(value)===1){
                   return  <Tag>未审批</Tag>
-                }else if(value==2){
+                }else if(Number(value)===2){
                     return <Tag color="green">审批通过</Tag>
                 }else{
                     return <Tag color="red">审批拒绝</Tag>

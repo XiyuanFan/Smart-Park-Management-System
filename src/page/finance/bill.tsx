@@ -54,7 +54,8 @@ function Bill() {
             key: "status",
             width: 100,
             render(value) {
-                return value == 1 ? <Tag color="green">已缴费</Tag> : <Tag color="red">未缴费</Tag>
+                // 接口返回的 status 是字符串，需显式转数字后再比较
+                return Number(value) === 1 ? <Tag color="green">已缴费</Tag> : <Tag color="red">未缴费</Tag>
             }
         },
         {
@@ -150,7 +151,9 @@ function Bill() {
     const [dataList, setDataList] = useState<DataType[]>([]);
     const [page, setPage] = useState<number>(1)
     const [pageSize, setPageSize] = useState<number>(10);
-    const [loading, setLoading] = useState<boolean>(false);
+    // loading 状态没有渲染到界面上（表格只有数据没有 loading 属性），
+    // 保留 setLoading 以便将来接入表格的 loading，因此这里只解构 setter
+    const [, setLoading] = useState<boolean>(false);
     const [total, setTotal] = useState<number>(0)
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
     const [selectedRows, setSelectedRows] = useState<any>({ accountNo: "" })
@@ -206,6 +209,9 @@ function Bill() {
     const header = ["accountNo", "status", 'roomNo', 'carNo', 'tel', 'costName1', 'costName2', 'costName3', 'startDate', 'endDate', 'preferential', 'money', 'pay']
     useEffect(() => {
         loadData()
+        // loadData 未做 memo，加入依赖会导致无限请求；
+        // 这里刻意只在分页变化时重新拉取（查询由「查询」按钮单独触发）。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize])
     const onChange = (page: number, pageSize: number) => {
         setPage(page)

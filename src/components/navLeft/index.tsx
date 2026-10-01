@@ -27,6 +27,9 @@ function NavLeft() {
     // const selectedKey=location.pathname
     useEffect(() => {
         configMenu()
+        // configMenu 内部只用到 menuList，但它没有用 useCallback 包裹；
+        // 若把它放进依赖数组，每次渲染都会重建菜单。故只保留 menuList。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [menuList]); // menuList 变化时，重新生成左侧菜单（登录成功后菜单是异步获取的）
     async function configMenu() {
         const mappedMenuItems: MenuItem[] = mapMenuItems(menuList);

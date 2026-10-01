@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
@@ -22,6 +23,13 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
   imports: [
     // isGlobal 让 ConfigService 在各模块中无需重复 import
     ConfigModule.forRoot({ isGlobal: true }),
+    /*
+     * 内存缓存。
+     * cache-manager v7 不传 stores 时会使用 Keyv 的默认内存 store；
+     * ttl 单位为毫秒，这里只作为兜底默认值，各业务会按需覆盖。
+     * （注意 v7 已移除旧的 max 选项）
+     */
+    CacheModule.register({ isGlobal: true, ttl: 5 * 60 * 1000 }),
     PrismaModule,
     MenuModule,
     AuthModule,

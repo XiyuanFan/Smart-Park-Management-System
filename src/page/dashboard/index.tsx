@@ -138,6 +138,9 @@ function Dashboard() {
             setData(updataOption)
         }
         loadData()
+        // 图表 option 只在挂载时构建一次。data 是 option 的初始值，
+        // 若加入依赖会形成「构建 option → setData → 再次构建」的循环。
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return <div className="dashboard">

@@ -25,13 +25,13 @@ function Merchants() {
             <div style={{ width: "1200px", margin: "auto" }}>
                 <Carousel autoplay arrows>
                     <div>
-                        <img src={pic1} />
+                        <img src={pic1} alt="招商宣传图 1" />
                     </div>
                     <div>
-                        <img src={pic2} />
+                        <img src={pic2} alt="招商宣传图 2" />
                     </div>
                     <div>
-                        <img src={pic3} />
+                        <img src={pic3} alt="招商宣传图 3" />
                     </div>
                 </Carousel>
             </div>

@@ -1,7 +1,6 @@
 import "./style.scss"
 import ReactECharts from "echarts-for-react"
-import { Card, Col, Row, Progress, Timeline, Tag, Statistic, Table } from 'antd';
-import { RadarChartOutlined, SnippetsOutlined, DollarOutlined, LaptopOutlined } from "@ant-design/icons"
+import { Card, Col, Row, Table } from 'antd';
 const columns:any=[
     {
         title:"No.",

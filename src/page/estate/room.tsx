@@ -1,4 +1,4 @@
-import { Card, Row, Col, Image, Radio, Spin } from "antd"
+import { Card, Row, Col, Image, Radio, Spin, Button } from "antd"
 import { useEffect, useState } from "react"
 import { getRoomList } from "../../api/room"
 import "./index.scss"
@@ -92,7 +92,7 @@ function Room() {
                     room.map((item) => {
                         return <>
                             <Col span={6} className="item">
-                                <Card title="房间号" extra={<a onClick={() => showImage(item.src)}>户型图</a>}>
+                                <Card title="房间号" extra={<Button type="link" size="small" onClick={() => showImage(item.src)}>户型图</Button>}>
                                     <h1>{item.roomNumber}</h1>
                                     <div className="clearfix mt">
                                         <p className="fl">装修情况：</p>

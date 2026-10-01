@@ -52,7 +52,8 @@ function App() {
       // 401/网络异常已由 axios 响应拦截器统一处理，这里只做兜底，
       // 避免出现未捕获的 Promise rejection。
     })
-  }, [token])
+    // dispatch 来自 useDispatch()，引用稳定，加入依赖不会造成重复执行
+  }, [token, dispatch])
   //useEffect的第二个参数：依赖数组，决定副作用函数何时执行(初次渲染和改变时执行一次)；这里的依赖数组token是用来判断当前登录态
   //token决定当前身份，当前身份决定菜单，菜单决定可访问页面，页面路由在运行时动态生成
 
